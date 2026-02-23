@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<title>Dirección</title>
+
+<style>
+body{font-family:Arial;background:#eee;}
+.container{width:500px;margin:40px auto;background:white;padding:25px;}
+input,select,button{width:100%;padding:10px;margin-top:10px;}
+button{background:#333;color:white;border:none;}
+.error{color:red;}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Dirección para entrega</h2>
+
+<label>Código Postal</label>
+<input type="text" id="cp" readonly>
+<button onclick="buscarCP()">Buscar código postal</button>
+
+<label>Estado</label>
+<select id="estado">
+<option value="">Seleccione estado</option>
+</select>
+
+<label>Colonia</label>
+<select id="colonia">
+<option value="">Seleccione colonia</option>
+</select>
+
+<label>Calle y número</label>
+<input type="text" id="calle">
+
+<label>Referencia</label>
+<input type="text" id="referencia">
+
+<button onclick="guardar()">Guardar</button>
+
+<div id="error" class="error"></div>
+
+</div>
+
+<script>
+
+let dato = null;
+
+
+// 🔹 BUSCAR CP ALEATORIO
+async function buscarCP(){
+
+    try{
+        const response = await fetch("https://utilidades.vmartinez84.xyz/api/CodigosPostales/Aleatorio");
+        dato = await response.json();
+
+        // llenar campos
+        cp.value = dato.codigoPostal;
+
+        estado.innerHTML = `<option>${dato.estado}</option>`;
+        colonia.innerHTML = `<option>${dato.colonia}</option>`;
+
+        error("");
+
+    }catch{
+        error("Error consultando servicio");
+    }
+}
+
+
+// 🔹 VALIDACIONES
+function validar(){
+
+    if(cp.value==="") return "Debe buscar código postal";
+    if(calle.value==="") return "Ingrese calle";
+    if(referencia.value==="") return "Ingrese referencia";
+
+    return "";
+}
+
+
+// 🔹 GUARDAR JSON + POST
+async function guardar(){
+
+    const err = validar();
+    if(err){ error(err); return; }
+
+    const json = {
+        codigoPostal: cp.value,
+        estado: dato.estado,
+        municipio: dato.alcaldia,
+        colonia: dato.colonia,
+        calle: calle.value,
+        referencia: referencia.value
+    };
+
+    console.log("JSON:", json);
+
+    await fetch("https://postman-echo.com/post",{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify(json)
+    });
+
+    alert("Datos enviados correctamente");
+}
+
+
+function error(msg){
+    document.getElementById("error").innerText = msg;
+}
+
+</script>
+
+</body>
+</html>

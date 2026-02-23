@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personajes Dragon Ball</title>
+</head>
+
+<body onload="cargarPersonajes()">
+
+    <h2>Selecciona un personaje de Dragon Ball</h2>
+
+    <select id="personajeSelect">
+        <option value="">Seleccione un personaje</option>
+    </select>
+
+    <div id="info"></div>
+
+    <script>
+        
+        async function obtenerPersonajes() {
+            const response = await fetch("https://dragonball-api.com/api/characters");
+            const data = await response.json();
+            return data.items; // la API devuelve los personajes dentro de "items"
+        }
+
+        
+        async function cargarPersonajes() {
+            const personajes = await obtenerPersonajes();
+            const select = document.getElementById("personajeSelect");
+
+            personajes.forEach(personaje => {
+                const option = document.createElement("option");
+                option.value = personaje.id;
+                option.textContent = personaje.name;
+                select.appendChild(option);
+            });
+
+            
+            select.addEventListener("change", mostrarInfo);
+        }
+
+        
+        async function mostrarInfo() {
+            const id = document.getElementById("personajeSelect").value;
+            if (!id) return;
+
+            const response = await fetch(`https://dragonball-api.com/api/characters/${id}`);
+            const personaje = await response.json();
+
+            document.getElementById("info").innerHTML = `
+                <h3>${personaje.name}</h3>
+                <img src="${personaje.image}" width="200">
+                <p><b>Raza:</b> ${personaje.race}</p>
+                <p><b>Género:</b> ${personaje.gender}</p>
+                <p><b>Descripción:</b> ${personaje.description}</p>
+            `;
+        }
+    </script>
+
+</body>
+
+</html>
